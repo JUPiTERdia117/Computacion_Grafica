@@ -1,5 +1,5 @@
 //Practica#3 Monroy Salazar
-//Fecha de entrega 21 de febrero de 2025
+//Fecha de entrega 20 de febrero de 2025
 //315118894
 
 //Acomodar x cantidad de cubos (misma cantidad de 
