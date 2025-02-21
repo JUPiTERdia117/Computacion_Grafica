@@ -5,7 +5,8 @@
 //Acomodar x cantidad de cubos (misma cantidad de 
 //letras que mi apellido mas largo), con caras
 // de diferente color
-//Salazar-7 cubos
+//Apellido: Salazar-7 cubos
+
 
 
 #include<iostream>
