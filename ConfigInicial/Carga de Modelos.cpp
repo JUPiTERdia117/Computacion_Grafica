@@ -145,6 +145,7 @@ int main( )
         glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelR));
         room.Draw(shader);
 
+
         //Silla
         glm::mat4 modelChair(1);
         modelChair = glm::translate(modelChair, glm::vec3(0.0f, -0.5f, 0.0f));
@@ -194,19 +195,13 @@ int main( )
         chair.Draw(shader);
 
 
-        // Draw the loaded model dogo
-        glm::mat4 mDog(1);
-        mDog = glm::translate(mDog, glm::vec3(-2.2f, 0.58f, -1.5f));
-        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(mDog));
-        dog.Draw(shader);
-
-
         //Pizarron
         glm::mat4 modelBoard(1);
         modelBoard = glm::translate(modelBoard, glm::vec3(0.0f, 0.0f, -3.0f));
         modelBoard = glm::scale(modelBoard, glm::vec3(0.01f, 0.01f, 0.01f));
         glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelBoard));
         board.Draw(shader);
+
 
 
         //Mesa
@@ -216,6 +211,16 @@ int main( )
         modelTable = glm::scale(modelTable, glm::vec3(0.7f, 0.7f, 0.7f));
         glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelTable));
         tablec.Draw(shader);
+
+
+        // Draw the loaded model dogo
+        glm::mat4 mDog(1);
+        mDog = glm::translate(mDog, glm::vec3(-2.2f, 0.58f, -1.5f));
+        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(mDog));
+        dog.Draw(shader);
+
+
+        
 
 
 
