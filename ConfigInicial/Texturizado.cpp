@@ -1,6 +1,6 @@
 
 //Practica#7 (Texturizado) Monroy Salazar
-//Fecha de entrega 18 de Marzo de 2025
+//Fecha de entrega 19 de Marzo de 2025
 //315118894
 
 
@@ -106,10 +106,56 @@ int main()
 	GLfloat vertices[] =
 	{
 		// Positions            // Colors              // Texture Coords
-		-0.5f, -0.5f, 0.0f,    1.0f, 1.0f,1.0f,		0.0f,0.0f,
-		0.5f, -0.5f, 0.0f,	   1.0f, 1.0f,1.0f,		2.0f,0.0f,
-		0.5f,  0.5f, 0.0f,     1.0f, 1.0f,1.0f,	    2.0f,2.0f,
-		-0.5f,  0.5f, 0.0f,    1.0f, 1.0f,1.0f,		0.0f,2.0f,
+
+		//Rojo
+		-0.5f, -0.5f, 0.5f,   1.0f, 1.0f,1.0f,		0.25f,0.33f,//u0,v0
+		0.5f, -0.5f, 0.5f,    1.0f, 1.0f,1.0f,		0.5f,0.33f,//u1,v0
+		0.5f,  0.5f, 0.5f,    1.0f, 1.0f,1.0f,	    0.5f,0.66f,//u1,v1
+		0.5f,  0.5f, 0.5f,    1.0f, 1.0f,1.0f,		0.5f,0.66f,//u1,v1
+		-0.5f,  0.5f, 0.5f,   1.0f, 1.0f,1.0f,		0.25f,0.66f,//u0,v1
+		-0.5f, -0.5f, 0.5f,   1.0f, 1.0f,1.0f,		0.25f,0.33f,//u0,v0
+
+	
+		//Naranja							  
+		-0.5f, -0.5f,-0.5f,   1.0f, 1.0f,1.0f,		0.75f,0.33f,//u0,v0
+		 0.5f, -0.5f,-0.5f,   1.0f, 1.0f,1.0f,		1.0f,0.33f,//u1,v0
+		 0.5f,  0.5f,-0.5f,   1.0f, 1.0f,1.0f,	    1.0f,0.66f,//u1,v1
+		 0.5f,  0.5f,-0.5f,   1.0f, 1.0f,1.0f,		1.0f,0.66f,//u1,v1
+		-0.5f,  0.5f,-0.5f,   1.0f, 1.0f,1.0f,		0.75f,0.66f,//u0,v1
+		-0.5f, -0.5f,-0.5f,   1.0f, 1.0f,1.0f,		0.75f,0.33f,//u0,v0
+		 
+		//Azul
+		 0.5f, -0.5f,  0.5f,  1.0f, 1.0f,1.0f,		0.5f,0.33f,//u0,v0
+		 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,1.0f,		0.75f,0.33f,//u1,v0
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,1.0f,	    0.75f,0.66f,//u1,v1
+		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,1.0f,		0.75f,0.66f,//u1,v1
+		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,1.0f,		0.5f,0.66f,//u0,v1
+		 0.5f,  -0.5f, 0.5f,  1.0f, 1.0f,1.0f,		0.5f,0.33f,//u0,v0
+
+		//Verde
+		-0.5f,  0.5f,  0.5f,  1.0f, 1.0f,1.0f,		0.0f,0.33f,//u0,v0
+		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,1.0f,		0.25f,0.33f,//u1,v0
+		-0.5f, -0.5f, -0.5f,  1.0f, 1.0f,1.0f,	    0.25f,0.66f,//u1,v1
+		-0.5f, -0.5f, -0.5f,  1.0f, 1.0f,1.0f,		0.25f,0.66f,//u1,v1
+		-0.5f, -0.5f,  0.5f,  1.0f, 1.0f,1.0f,		0.0f,0.66f,//u0,v1
+		-0.5f,  0.5f,  0.5f,  1.0f, 1.0f,1.0f,		0.0f,0.33f,//u0,v0
+
+		//Amarillo
+		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f,1.0f,		0.25f,0.0f,//u0,v0
+		0.5f, -0.5f, -0.5f,  1.0f, 1.0f,1.0f,		0.5f,0.0f,//u1,v0
+		0.5f, -0.5f,  0.5f,  1.0f, 1.0f,1.0f,	    0.5f,0.33f,//u1,v1
+		0.5f, -0.5f,  0.5f,  1.0f, 1.0f,1.0f,		0.5f,0.33f,//u1,v1
+		-0.5f, -0.5f,  0.5f, 1.0f, 1.0f,1.0f,		0.25f,0.33f,//u0,v1
+		-0.5f, -0.5f, -0.5f, 1.0f, 1.0f,1.0f,		0.25f,0.0f,//u0,v0
+
+
+		//Blanco
+		-0.5f,  0.5f, -0.5f, 1.0f, 1.0f,1.0f,		0.25f,0.66f,//u0,v0
+		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,1.0f,		0.5f,0.66f,//u1,v0
+		0.5f,  0.5f,  0.5f,  1.0f, 1.0f,1.0f,	    0.5f,1.0f,//u1,v1
+		0.5f,  0.5f,  0.5f,  1.0f, 1.0f,1.0f,		0.5f,1.0f,//u1,v1
+		-0.5f,  0.5f,  0.5f, 1.0f, 1.0f,1.0f,		0.25f,1.0f,//u0,v1
+		-0.5f,  0.5f, -0.5f, 1.0f, 1.0f,1.0f,		0.25f,0.66f,//u0,v0
 
 		
 	};
@@ -157,9 +203,10 @@ int main()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
 	// Diffuse map
-	/*image = stbi_load("images/checker_Tex.png", &textureWidth, &textureHeight, &nrChannels,0);*/
-	image = stbi_load("images/window.png", &textureWidth, &textureHeight, &nrChannels, 0);
-	/*image = stbi_load("images/bdy.png", &textureWidth, &textureHeight, &nrChannels, 0);*/
+	//image = stbi_load("images/checker_Tex.png", &textureWidth, &textureHeight, &nrChannels,0);
+	//image = stbi_load("images/window.png", &textureWidth, &textureHeight, &nrChannels, 0);
+	//image = stbi_load("images/bdy.png", &textureWidth, &textureHeight, &nrChannels, 0);
+	image = stbi_load("images/rubik.png", &textureWidth, &textureHeight, &nrChannels, 0);
 	glBindTexture(GL_TEXTURE_2D, texture1);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
 	glGenerateMipmap(GL_TEXTURE_2D);
@@ -214,7 +261,8 @@ int main()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		// Draw the light object (using light's vertex attributes)
 		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 
 		// Swap the screen buffers
