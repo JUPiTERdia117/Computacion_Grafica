@@ -1,5 +1,5 @@
 //Practica#8 (Iluminacion) Monroy Salazar
-//Fecha de entrega 25 de Marzo de 2025
+//Fecha de entrega 26 de Marzo de 2025
 //315118894
 
 
@@ -44,14 +44,17 @@ bool firstMouse = true;
 
 
 // Light attributes
-glm::vec3 lightPos(0.5f, 0.5f, 2.5f);
-glm::vec3 lightPos2(0.5f, 0.5f, -1.5f);
-float movelightPos = 0.0f;
-float movelightPos2 = 0.0f;
+glm::vec3 lightPos(0.0f, 6.0f, 0.0f);
+float lightAngle = glm::radians(90.0f); // Ángulo inicial en 90 grados (eje Y)
+float lightRadius = 6.0f;
+glm::vec3 lightPos2(0.0f, 6.0f, 0.0f);
+float lightAngle2 = glm::radians(90.0f); // Ángulo inicial en 90 grados (eje Y)
 GLfloat deltaTime = 0.0f;
 GLfloat lastFrame = 0.0f;
 float rot = 0.0f;
 bool activanim = false;
+
+bool useSecondLight = false; // Controla si la segunda luz está activa
 
 int main()
 {
@@ -65,7 +68,7 @@ int main()
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
     // Create a GLFWwindow object that we can use for GLFW's functions
-    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Materiales e Iluminacion Monroy Salazar", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Practica 8 Iluminacion Monroy Salazar", nullptr, nullptr);
 
     if (nullptr == window)
     {
@@ -110,8 +113,11 @@ int main()
 
 
     // Load models
-    Model red_dog((char*)"Models/RedDog.obj");
+    Model dog((char*)"Models/RedDog.obj");
     Model chair((char*)"Models/Chair/kursi.obj");
+    Model tablec((char*)"Models/Table/Chair_and_Table_School.obj");
+    Model room((char*)"Models/Room/Room.obj");
+    Model board((char*)"Models/Piza/pizar.obj");
     glm::mat4 projection = glm::perspective(camera.GetZoom(), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
 
     float vertices[] = {
@@ -216,41 +222,74 @@ int main()
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // Actualizar posición de la luz basada en el ángulo
+        lightPos.x = lightRadius * cos(lightAngle);
+        lightPos.y = lightRadius * sin(lightAngle);
+
+        lightPos2.x = lightRadius * cos(lightAngle2);
+        lightPos2.y = lightRadius * sin(lightAngle2);
+       
+
         
         lightingShader.Use();
         GLint lightPosLoc = glGetUniformLocation(lightingShader.Program, "light.position");
         GLint viewPosLoc = glGetUniformLocation(lightingShader.Program, "viewPos");
-        glUniform3f(lightPosLoc, lightPos.x + movelightPos, lightPos.y + movelightPos, lightPos.z + movelightPos);
+        glUniform3f(lightPosLoc, lightPos.x , lightPos.y, lightPos.z);
         glUniform3f(viewPosLoc, camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z);
 
         
         GLint lightPos2Loc = glGetUniformLocation(lightingShader.Program, "light2.position");
-        glUniform3f(lightPos2Loc, lightPos2.x + movelightPos2, lightPos2.y + movelightPos2, lightPos2.z + movelightPos2);
+        glUniform3f(lightPos2Loc, lightPos2.x, lightPos2.y , lightPos2.z );
 
 
 
         // Set lights properties
         
-        glUniform3f(glGetUniformLocation(lightingShader.Program, "light.ambient"), 0.3, 0.3f, 0.3f);
-        glUniform3f(glGetUniformLocation(lightingShader.Program, "light.diffuse"), 0.25f, 0.25f, 0.25f);
-        glUniform3f(glGetUniformLocation(lightingShader.Program, "light.specular"), 0.0f, 0.0f, 0.0f);
+        if (useSecondLight)
+        {
+            // Luz 2 activa, Luz 1 inactiva
+            glUniform3f(glGetUniformLocation(lightingShader.Program, "light.ambient"), 0.0f, 0.0f, 0.0f);
+            glUniform3f(glGetUniformLocation(lightingShader.Program, "light.diffuse"), 0.0f, 0.0f, 0.0f);
+            glUniform3f(glGetUniformLocation(lightingShader.Program, "light.specular"), 0.0f, 0.0f, 0.0f);
 
-        
-        glUniform3f(glGetUniformLocation(lightingShader.Program, "light2.ambient"), 0.0f, 0.0f, 0.0f);
-        glUniform3f(glGetUniformLocation(lightingShader.Program, "light2.diffuse"), 0.5f, 0.5f, 0.5f);
-        glUniform3f(glGetUniformLocation(lightingShader.Program, "light2.specular"), 1.0f, 1.0f, 1.0f);
+            glUniform3f(glGetUniformLocation(lightingShader.Program, "light2.ambient"), 0.5f, 0.5f, 0.5f);
+            glUniform3f(glGetUniformLocation(lightingShader.Program, "light2.diffuse"), 0.75f, 0.75f, 0.75f);
+            glUniform3f(glGetUniformLocation(lightingShader.Program, "light2.specular"), 0.2f, 0.2f, 0.2f);
+
+            // Set material properties
+
+            // Azul
+            
+            glUniform3f(glGetUniformLocation(lightingShader.Program, "material.ambient"), 0.1f, 0.1f, 0.3f);  
+            glUniform3f(glGetUniformLocation(lightingShader.Program, "material.diffuse"), 0.3f, 0.3f, 0.6f);  
+            glUniform3f(glGetUniformLocation(lightingShader.Program, "material.specular"), 0.5f, 0.5f, 1.0f); 
+            glUniform1f(glGetUniformLocation(lightingShader.Program, "material.shininess"), 8.0f);
+        }
+        else
+        {
+            // Luz 1 activa, Luz 2 inactiva
+            glUniform3f(glGetUniformLocation(lightingShader.Program, "light.ambient"), 0.4f, 0.4f, 0.4f);
+            glUniform3f(glGetUniformLocation(lightingShader.Program, "light.diffuse"), 0.65f, 0.65f, 0.65f);
+            glUniform3f(glGetUniformLocation(lightingShader.Program, "light.specular"), 0.4f, 0.4f, 0.4f);
+
+            glUniform3f(glGetUniformLocation(lightingShader.Program, "light2.ambient"), 0.0f, 0.0f, 0.0f);
+            glUniform3f(glGetUniformLocation(lightingShader.Program, "light2.diffuse"), 0.0f, 0.0f, 0.0f);
+            glUniform3f(glGetUniformLocation(lightingShader.Program, "light2.specular"), 0.0f, 0.0f, 0.0f);
+
+            // Set material properties
+            //Amarillo
+            glUniform3f(glGetUniformLocation(lightingShader.Program, "material.ambient"), 0.4f, 0.4f, 0.0f);
+            glUniform3f(glGetUniformLocation(lightingShader.Program, "material.diffuse"), 0.8f, 0.8f, 0.1f);
+            glUniform3f(glGetUniformLocation(lightingShader.Program, "material.specular"), 0.9f, 0.9f, 0.9f);
+            glUniform1f(glGetUniformLocation(lightingShader.Program, "material.shininess"), 0.6f);
+        }
 
 
         glm::mat4 view = camera.GetViewMatrix();
         glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
 
-        // Set material properties
         
-        glUniform3f(glGetUniformLocation(lightingShader.Program, "material.ambient"), 0.5f, 0.5f, 0.0f);
-        glUniform3f(glGetUniformLocation(lightingShader.Program, "material.diffuse"), 0.8f, 0.8f, 0.1f);
-        glUniform3f(glGetUniformLocation(lightingShader.Program, "material.specular"), 1.0f, 1.0f, 1.0f);
-        glUniform1f(glGetUniformLocation(lightingShader.Program, "material.shininess"), 0.6f);
 
         
 
@@ -258,31 +297,93 @@ int main()
 
 
 
-        // Draw the loaded model
-        glm::mat4 model(1);
-        model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
-        glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-        glBindVertexArray(VAO);
+        
 
-        glm::mat4 model2(1);
-        model2 = glm::scale(model2, glm::vec3(3.0f, 3.0f, 3.0f));
-        glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model2));
-        glBindVertexArray(VAO);
+        
        
 
-        red_dog.Draw(lightingShader);
+        //Cuarto
+        glm::mat4 modelR(1);
+        modelR = glm::translate(modelR, glm::vec3(0.0f, -0.45f, 0.0f));
+        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelR));
+        room.Draw(lightingShader);
 
-        glm::mat4 chair1(1);
 
-
-        chair1 = glm::scale(chair1, glm::vec3(0.65f, 0.65f, 0.65f));
-        chair1 = glm::translate(chair1, glm::vec3(2.5f, -1.25f, 0.0f));
-        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(chair1));
+        //Silla
+        glm::mat4 modelChair(1);
+        modelChair = glm::translate(modelChair, glm::vec3(0.0f, -0.5f, 0.0f));
+        modelChair = glm::scale(modelChair, glm::vec3(0.4f, 0.4f, 0.4f));
+        modelChair = glm::rotate(modelChair, -55.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelChair));
         chair.Draw(lightingShader);
-        //glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        //Silla2
+        glm::mat4 modelChair2(1);
+        modelChair2 = glm::translate(modelChair2, glm::vec3(-1.0f, -0.5f, 0.0f));
+        modelChair2 = glm::scale(modelChair2, glm::vec3(0.4f, 0.4f, 0.4f));
+        modelChair2 = glm::rotate(modelChair2, -55.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelChair2));
+        chair.Draw(lightingShader);
+
+        //Silla3
+        glm::mat4 modelChair3(1);
+        modelChair3 = glm::translate(modelChair3, glm::vec3(1.0f, -0.5f, 0.0f));
+        modelChair3 = glm::scale(modelChair3, glm::vec3(0.4f, 0.4f, 0.4f));
+        modelChair3 = glm::rotate(modelChair3, -55.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelChair3));
+        chair.Draw(lightingShader);
+
+        //Silla4
+        glm::mat4 modelChair4(1);
+        modelChair4 = glm::translate(modelChair4, glm::vec3(0.0f, -0.5f, 1.0f));
+        modelChair4 = glm::scale(modelChair4, glm::vec3(0.4f, 0.4f, 0.4f));
+        modelChair4 = glm::rotate(modelChair4, -55.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelChair4));
+        chair.Draw(lightingShader);
+
+        //Silla5
+        glm::mat4 modelChair5(1);
+        modelChair5 = glm::translate(modelChair5, glm::vec3(-1.0f, -0.5f, 1.0f));
+        modelChair5 = glm::scale(modelChair5, glm::vec3(0.4f, 0.4f, 0.4f));
+        modelChair5 = glm::rotate(modelChair5, -55.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelChair5));
+        chair.Draw(lightingShader);
+
+        //Silla3
+        glm::mat4 modelChair6(1);
+        modelChair6 = glm::translate(modelChair6, glm::vec3(1.0f, -0.5f, 1.0f));
+        modelChair6 = glm::scale(modelChair6, glm::vec3(0.4f, 0.4f, 0.4f));
+        modelChair6 = glm::rotate(modelChair6, -55.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelChair6));
+        chair.Draw(lightingShader);
+
+
+        //Pizarron
+        glm::mat4 modelBoard(1);
+        modelBoard = glm::translate(modelBoard, glm::vec3(0.0f, 0.0f, -3.0f));
+        modelBoard = glm::scale(modelBoard, glm::vec3(0.01f, 0.01f, 0.01f));
+        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelBoard));
+        board.Draw(lightingShader);
+
+
+
+        //Mesa
+        glm::mat4 modelTable(1);
+        modelTable = glm::translate(modelTable, glm::vec3(-2.3f, -0.5f, -2.0f));
+        modelTable = glm::rotate(modelTable, 135.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+        modelTable = glm::scale(modelTable, glm::vec3(0.7f, 0.7f, 0.7f));
+        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(modelTable));
+        tablec.Draw(lightingShader);
+
+
+        // Draw the loaded model dogo
+        glm::mat4 mDog(1);
+        mDog = glm::translate(mDog, glm::vec3(-2.2f, 0.58f, -1.5f));
+        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(mDog));
+        dog.Draw(lightingShader);
         
 
-        glBindVertexArray(0);
+        
 
 
 
@@ -290,22 +391,20 @@ int main()
         lampshader.Use();
         glUniformMatrix4fv(glGetUniformLocation(lampshader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(glGetUniformLocation(lampshader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, lightPos + movelightPos);
-        model = glm::scale(model, glm::vec3(0.3f));
-        glUniformMatrix4fv(glGetUniformLocation(lampshader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        glBindVertexArray(0);
 
-
-        lampshader.Use();
-        glUniformMatrix4fv(glGetUniformLocation(lampshader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-        glUniformMatrix4fv(glGetUniformLocation(lampshader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
-        model2 = glm::mat4(1.0f);
-        model2 = glm::translate(model2, lightPos2 + movelightPos2);
-        model2 = glm::scale(model2, glm::vec3(0.3f));
-        glUniformMatrix4fv(glGetUniformLocation(lampshader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model2));
+        glm::mat4 lampModel(1.0f);
+        if (useSecondLight)
+        {
+            // Dibujar lámpara de la segunda luz
+            lampModel = glm::translate(lampModel, lightPos2);
+        }
+        else
+        {
+            // Dibujar lámpara de la primera luz
+            lampModel = glm::translate(lampModel, lightPos);
+        }
+        lampModel = glm::scale(lampModel, glm::vec3(0.3f));
+        glUniformMatrix4fv(glGetUniformLocation(lampshader.Program, "model"), 1, GL_FALSE, glm::value_ptr(lampModel));
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
@@ -374,30 +473,30 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
         }
     }
 
-    if (keys[GLFW_KEY_O])
+    if (keys[GLFW_KEY_R] && !useSecondLight)
     {
-       
-        
-        movelightPos += 0.1f;
+        lightAngle += 2.0f * deltaTime; // Rotar en sentido horario
     }
 
-    if (keys[GLFW_KEY_L])
+    if (keys[GLFW_KEY_F] && !useSecondLight)
     {
-        
-        
-        movelightPos -= 0.1f;
+        lightAngle -= 2.0f * deltaTime; // Rotar en sentido antihorario
     }
 
-    if (keys[GLFW_KEY_I])
+    if (keys[GLFW_KEY_T] && useSecondLight)
     {
-
-        
-        movelightPos2 -= 0.1f;
+        lightAngle2 += 2.0f * deltaTime; // Rotar en sentido horario
     }
 
-    if (keys[GLFW_KEY_K])
+    if (keys[GLFW_KEY_G] && useSecondLight)
     {
-        movelightPos2 += 0.1f;
+        lightAngle2 -= 2.0f * deltaTime; // Rotar en sentido antihorario
+    }
+    
+
+    if (keys[GLFW_KEY_Z])
+    {
+        useSecondLight = !useSecondLight; // Alternar estado al presionar Z
     }
 
 
