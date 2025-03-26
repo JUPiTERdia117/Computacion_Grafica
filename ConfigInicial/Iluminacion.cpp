@@ -111,6 +111,7 @@ int main()
 
     // Load models
     Model red_dog((char*)"Models/RedDog.obj");
+    Model chair((char*)"Models/Chair/kursi.obj");
     glm::mat4 projection = glm::perspective(camera.GetZoom(), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
 
     float vertices[] = {
@@ -231,13 +232,13 @@ int main()
         // Set lights properties
         
         glUniform3f(glGetUniformLocation(lightingShader.Program, "light.ambient"), 0.3, 0.3f, 0.3f);
-        glUniform3f(glGetUniformLocation(lightingShader.Program, "light.diffuse"), 0.3f, 0.3f, 0.3f);
+        glUniform3f(glGetUniformLocation(lightingShader.Program, "light.diffuse"), 0.25f, 0.25f, 0.25f);
         glUniform3f(glGetUniformLocation(lightingShader.Program, "light.specular"), 0.0f, 0.0f, 0.0f);
 
         
         glUniform3f(glGetUniformLocation(lightingShader.Program, "light2.ambient"), 0.0f, 0.0f, 0.0f);
-        glUniform3f(glGetUniformLocation(lightingShader.Program, "light2.diffuse"), 0.3f, 0.3f, 0.3f);
-        glUniform3f(glGetUniformLocation(lightingShader.Program, "light2.specular"), 0.0f, 0.0f, 0.0f);
+        glUniform3f(glGetUniformLocation(lightingShader.Program, "light2.diffuse"), 0.5f, 0.5f, 0.5f);
+        glUniform3f(glGetUniformLocation(lightingShader.Program, "light2.specular"), 1.0f, 1.0f, 1.0f);
 
 
         glm::mat4 view = camera.GetViewMatrix();
@@ -270,6 +271,14 @@ int main()
        
 
         red_dog.Draw(lightingShader);
+
+        glm::mat4 chair1(1);
+
+
+        chair1 = glm::scale(chair1, glm::vec3(0.65f, 0.65f, 0.65f));
+        chair1 = glm::translate(chair1, glm::vec3(2.5f, -1.25f, 0.0f));
+        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(chair1));
+        chair.Draw(lightingShader);
         //glDrawArrays(GL_TRIANGLES, 0, 36);
         
 
