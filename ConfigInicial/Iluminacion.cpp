@@ -1,5 +1,5 @@
 //Practica#8 (Iluminacion) Monroy Salazar
-//Fecha de entrega 26 de Marzo de 2025
+//Fecha de entrega 28 de Marzo de 2025
 //315118894
 
 
