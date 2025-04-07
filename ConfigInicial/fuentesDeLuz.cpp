@@ -1,5 +1,5 @@
 //Practica#9 (Fuentes de luz) Monroy Salazar
-//Fecha de entrega 01 de Abril de 2025
+//Fecha de entrega 06 de Abril de 2025
 //315118894
 
 
@@ -45,8 +45,15 @@ GLfloat lastY = HEIGHT / 2.0;
 bool keys[1024];
 bool firstMouse = true;
 // Light attributes
-glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
+glm::vec3 lightPos(0.0f, 6.0f, 0.0f);
 bool active;
+
+float lightAngle = glm::radians(90.0f); // ?ngulo inicial en 90 grados (eje Y)
+float lightRadius = 6.0f;
+glm::vec3 lightPos2(0.0f, 6.0f, 0.0f);
+float lightAngle2 = glm::radians(90.0f); // ?ngulo inicial en 90 grados (eje Y)
+
+bool useSecondLight = false; // Controla si la segunda luz est? activa
 
 // Positions of the point lights
 glm::vec3 pointLightPositions[] = {
@@ -121,7 +128,7 @@ int main()
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);*/
 
 	// Create a GLFWwindow object that we can use for GLFW's functions
-	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Fuentes de luz Monroy Salazar", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Practica 9 Monroy Salazar", nullptr, nullptr);
 
 	if (nullptr == window)
 	{
@@ -159,9 +166,13 @@ int main()
 	Shader lightingShader("Shader/lighting.vs", "Shader/lighting.frag");
 	Shader lampShader("Shader/lamp.vs", "Shader/lamp.frag");
 	
-	Model Dog((char*)"Models/RedDog.obj");
 	Model ball((char*)"Models/ball.obj");
-	Model Piso((char*)"Models/piso.obj");
+	Model piso((char*)"Models/piso.obj");
+	Model dog((char*)"Models/RedDog.obj");
+	Model chair((char*)"Models/Chair/kursi.obj");
+	Model tablec((char*)"Models/Table/Chair_and_Table_School.obj");
+	Model room((char*)"Models/Room/Room.obj");
+	Model board((char*)"Models/Piza/pizar.obj");
 
 
 
@@ -208,7 +219,12 @@ int main()
 
 		
 		
-		//Load Model
+		// Actualizar posici?n de la luz basada en el ?ngulo
+		lightPos.x = lightRadius * cos(lightAngle);
+		lightPos.y = lightRadius * sin(lightAngle);
+
+		lightPos2.x = lightRadius * cos(lightAngle2);
+		lightPos2.y = lightRadius * sin(lightAngle2);
 	
 
 		// Use cooresponding shader when setting uniforms/drawing objects
@@ -220,10 +236,19 @@ int main()
 		GLint viewPosLoc = glGetUniformLocation(lightingShader.Program, "viewPos");
 		glUniform3f(viewPosLoc, camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z);
 
+		
+		GLint lightPosLoc = glGetUniformLocation(lightingShader.Program, "pointLights[0].position");
+		glUniform3f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z);
+		
+		GLint lightPos2Loc = glGetUniformLocation(lightingShader.Program, "pointLights[1].position");
+		glUniform3f(lightPos2Loc, lightPos2.x, lightPos2.y, lightPos2.z);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[2].position"), pointLightPositions[2].x, pointLightPositions[2].y, pointLightPositions[2].z);
+
+		
 
 		// Directional light
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.direction"), -0.2f, -1.0f, -0.3f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.ambient"),0.05f,0.05f,0.05f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.ambient"),0.15f,0.15f,0.15f);
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.diffuse"), 0.05f, 0.05f, 0.05f);
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.specular"),0.3f, 0.3f, 0.3f);
 
@@ -234,25 +259,71 @@ int main()
 		lightColor.y= abs(sin(glfwGetTime() *Light1.y));
 		lightColor.z= sin(glfwGetTime() *Light1.z);
 
+		// Set lights properties
+
+		if (useSecondLight)
+		{
+			// Luz 2 activa, Luz 1 inactiva
+			
+			glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].ambient"), 0.0f, 0.0f, 0.0f);
+			glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].diffuse"), 0.0f, 0.0f, 0.0f);
+			glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].specular"), 0.0f, 0.0f, 0.0f);
+			glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].constant"), 1.0f);
+			glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].linear"), 0.045f);
+			glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].quadratic"), 0.075f);
+
+			
+			// Point light 2
+			
+			glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].ambient"), 0.1f, 0.1f, 0.1f);
+			glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].diffuse"), 0.75f, 0.75f, 0.75f);
+			glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].specular"), 0.2f, 0.2f, 0.2f);
+			glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[1].constant"), 1.0f);
+			glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[1].linear"), 0.0f);
+			glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[1].quadratic"), 0.0f);
+
+			// Set material properties
+
+			// Azul
+
+			glUniform3f(glGetUniformLocation(lightingShader.Program, "material.ambient"), 0.1f, 0.1f, 0.9f);
+			glUniform3f(glGetUniformLocation(lightingShader.Program, "material.diffuse"), 0.1f, 0.1f, 0.9f);
+			glUniform3f(glGetUniformLocation(lightingShader.Program, "material.specular"), 0.2f, 0.2f, 1.0f);
+			glUniform1f(glGetUniformLocation(lightingShader.Program, "material.shininess"), 4.0f);
+		}
+		else
+		{
+			// Luz 1 activa, Luz 2 inactiva
+			
+			glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].ambient"), 0.35f, 0.35f, 0.35f);
+			glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].diffuse"), 0.65f, 0.65f, 0.65f);
+			glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].specular"), 0.4f, 0.4f, 0.4f);
+			glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].constant"), 1.0f);
+			glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].linear"), 0.045f);
+			glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].quadratic"), 0.075f);
+
+			// Point light 2
+			
+			glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].ambient"), 0.0f, 0.0f, 0.0f);
+			glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].diffuse"), 0.0f, 0.0f, 0.0f);
+			glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].specular"), 0.0f, 0.0f, 0.0f);
+			glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[1].constant"), 1.0f);
+			glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[1].linear"), 0.0f);
+			glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[1].quadratic"), 0.0f);
+
+			// Set material properties
+			//Amarillo
+			glUniform3f(glGetUniformLocation(lightingShader.Program, "material.ambient"), 0.4f, 0.4f, 0.0f);
+			glUniform3f(glGetUniformLocation(lightingShader.Program, "material.diffuse"), 0.8f, 0.8f, 0.1f);
+			glUniform3f(glGetUniformLocation(lightingShader.Program, "material.specular"), 0.9f, 0.9f, 0.9f);
+			glUniform1f(glGetUniformLocation(lightingShader.Program, "material.shininess"), 0.6f);
+		}
 		
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].position"), pointLightPositions[0].x, pointLightPositions[0].y, pointLightPositions[0].z);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].ambient"), lightColor.x,lightColor.y, lightColor.z);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].diffuse"), lightColor.x,lightColor.y,lightColor.z);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].specular"), 1.0f, 0.3f, 0.3f);
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].constant"), 1.0f);
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].linear"), 0.045f);
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].quadratic"),0.075f);
+		
 
 
 
-		// Point light 2
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].position"), pointLightPositions[1].x, pointLightPositions[1].y, pointLightPositions[1].z);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].ambient"), 0.05f, 0.05f, 0.05f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].diffuse"), 0.0f, 0.0f, 0.0f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[1].specular"), 0.0f, 0.0f, 0.0f);
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[1].constant"), 1.0f);
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[1].linear"), 0.0f);
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[1].quadratic"), 0.0f);
+		
 
 		// Point light 3
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[2].position"), pointLightPositions[2].x, pointLightPositions[2].y, pointLightPositions[2].z);
@@ -309,27 +380,155 @@ int main()
         view = camera.GetViewMatrix();	
 		model = glm::mat4(1);
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		Piso.Draw(lightingShader);
+		piso.Draw(lightingShader);
 
 
+		//Cuarto
+		glm::mat4 modelR(1);
+		modelR = glm::translate(modelR, glm::vec3(0.0f, -0.45f, 0.0f));
+		//glEnable(GL_BLEND);//Avtiva la funcionalidad para trabajar el canal alfa
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelR));
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
+		room.Draw(lightingShader);
+		//glDisable(GL_BLEND);  //Desactiva el canal alfa 
+		glBindVertexArray(0);	
+
+		//Silla
+		glm::mat4 modelChair(1);
+		modelChair = glm::translate(modelChair, glm::vec3(0.0f, -0.5f, 0.0f));
+		modelChair = glm::scale(modelChair, glm::vec3(0.4f, 0.4f, 0.4f));
+		modelChair = glm::rotate(modelChair, -55.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+		//glEnable(GL_BLEND);//Avtiva la funcionalidad para trabajar el canal alfa
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelChair));
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
+		chair.Draw(lightingShader);
+		//glDisable(GL_BLEND);  //Desactiva el canal alfa 
+		glBindVertexArray(0);
+
+		//Silla2
+		glm::mat4 modelChair2(1);
+		modelChair2 = glm::translate(modelChair2, glm::vec3(-1.0f, -0.5f, 0.0f));
+		modelChair2 = glm::scale(modelChair2, glm::vec3(0.4f, 0.4f, 0.4f));
+		modelChair2 = glm::rotate(modelChair2, -55.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+		//glEnable(GL_BLEND);//Avtiva la funcionalidad para trabajar el canal alfa
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelChair2));
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
+		chair.Draw(lightingShader);
+		//glDisable(GL_BLEND);  //Desactiva el canal alfa 
+		glBindVertexArray(0);
+
+		//Silla3
+		glm::mat4 modelChair3(1);
+		modelChair3 = glm::translate(modelChair3, glm::vec3(1.0f, -0.5f, 0.0f));
+		modelChair3 = glm::scale(modelChair3, glm::vec3(0.4f, 0.4f, 0.4f));
+		modelChair3 = glm::rotate(modelChair3, -55.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+		//glEnable(GL_BLEND);//Avtiva la funcionalidad para trabajar el canal alfa
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelChair3));
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
+		chair.Draw(lightingShader);
+		//glDisable(GL_BLEND);  //Desactiva el canal alfa 
+		glBindVertexArray(0);
+
+		//Silla4
+		glm::mat4 modelChair4(1);
+		modelChair4 = glm::translate(modelChair4, glm::vec3(0.0f, -0.5f, 1.0f));
+		modelChair4 = glm::scale(modelChair4, glm::vec3(0.4f, 0.4f, 0.4f));
+		modelChair4 = glm::rotate(modelChair4, -55.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+		//glEnable(GL_BLEND);//Avtiva la funcionalidad para trabajar el canal alfa
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelChair4));
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
+		chair.Draw(lightingShader);
+		//glDisable(GL_BLEND);  //Desactiva el canal alfa 
+		glBindVertexArray(0);
+
+		//Silla5
+		glm::mat4 modelChair5(1);
+		modelChair5 = glm::translate(modelChair5, glm::vec3(-1.0f, -0.5f, 1.0f));
+		modelChair5 = glm::scale(modelChair5, glm::vec3(0.4f, 0.4f, 0.4f));
+		modelChair5 = glm::rotate(modelChair5, -55.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+		//glEnable(GL_BLEND);//Avtiva la funcionalidad para trabajar el canal alfa
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelChair5));
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
+		chair.Draw(lightingShader);
+		//glDisable(GL_BLEND);  //Desactiva el canal alfa 
+		glBindVertexArray(0);
+
+		//Silla6
+		glm::mat4 modelChair6(1);
+		modelChair6 = glm::translate(modelChair6, glm::vec3(1.0f, -0.5f, 1.0f));
+		modelChair6 = glm::scale(modelChair6, glm::vec3(0.4f, 0.4f, 0.4f));
+		modelChair6 = glm::rotate(modelChair6, -55.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+		//glEnable(GL_BLEND);//Avtiva la funcionalidad para trabajar el canal alfa
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelChair6));
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
+		chair.Draw(lightingShader);
+		//glDisable(GL_BLEND);  //Desactiva el canal alfa 
+		glBindVertexArray(0);
+
+
+		//Pizarron
+		glm::mat4 modelBoard(1);
+		modelBoard = glm::translate(modelBoard, glm::vec3(0.0f, 0.0f, -3.0f));
+		modelBoard = glm::scale(modelBoard, glm::vec3(0.01f, 0.01f, 0.01f));
+		//glEnable(GL_BLEND);//Avtiva la funcionalidad para trabajar el canal alfa
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelBoard));
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
+		board.Draw(lightingShader);
+		//glDisable(GL_BLEND);  //Desactiva el canal alfa 
+		glBindVertexArray(0);
+
+
+
+		//Mesa
+		glm::mat4 modelTable(1);
+		modelTable = glm::translate(modelTable, glm::vec3(-2.3f, -0.5f, -2.0f));
+		modelTable = glm::rotate(modelTable, 135.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+		modelTable = glm::scale(modelTable, glm::vec3(0.7f, 0.7f, 0.7f));
+		//glEnable(GL_BLEND);//Avtiva la funcionalidad para trabajar el canal alfa
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelTable));
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
+		tablec.Draw(lightingShader);
+		//glDisable(GL_BLEND);  //Desactiva el canal alfa 
+		glBindVertexArray(0);
+
+
+		// Draw the loaded model dogo
+		glm::mat4 modelDog(1);
+		modelDog = glm::translate(modelDog, glm::vec3(-2.2f, 0.58f, -1.5f));
+		//glEnable(GL_BLEND);//Avtiva la funcionalidad para trabajar el canal alfa
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(modelDog));
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
+		dog.Draw(lightingShader);
+		//glDisable(GL_BLEND);  //Desactiva el canal alfa 
+		glBindVertexArray(0);
 	
 		//model = glm::mat4(1);
 		////glEnable(GL_BLEND);//Avtiva la funcionalidad para trabajar el canal alfa
 		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		//glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
-	 //   Dog.Draw(lightingShader);
+	 //   dog.Draw(lightingShader);
 		////glDisable(GL_BLEND);  //Desactiva el canal alfa 
 		//glBindVertexArray(0);
 
-		model = glm::mat4(1);
-		glEnable(GL_BLEND);//Avtiva la funcionalidad para trabajar el canal alfa
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 1);
-		ball.Draw(lightingShader);
-		glDisable(GL_BLEND);  //Desactiva el canal alfa 
-		glBindVertexArray(0);
+		//model = glm::mat4(1);
+		//glEnable(GL_BLEND);//Avtiva la funcionalidad para trabajar el canal alfa
+		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		//glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		//glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 1);
+		//ball.Draw(lightingShader);
+		//glDisable(GL_BLEND);  //Desactiva el canal alfa 
+		//glBindVertexArray(0);
 	
 
 		// Also draw the lamp object, again binding the appropriate shader
@@ -347,7 +546,7 @@ int main()
 		model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		// Draw the light object (using light's vertex attributes)
-		for (GLuint i = 0; i < 4; i++)
+		for (GLuint i = 2; i < 4; i++)
 		{
 			model = glm::mat4(1);
 			model = glm::translate(model, pointLightPositions[i]);
@@ -358,6 +557,28 @@ int main()
 		}
 		glBindVertexArray(0);
 
+
+		
+		
+
+		glm::mat4 lampModel(1.0f);
+		if (useSecondLight)
+		{
+			// Dibujar l?mpara de la segunda luz
+			lampModel = glm::translate(lampModel, lightPos2);
+		}
+		else
+		{
+			// Dibujar l?mpara de la primera luz
+			lampModel = glm::translate(lampModel, lightPos);
+		}
+		lampModel = glm::scale(lampModel, glm::vec3(0.3f));
+		glUniformMatrix4fv(glGetUniformLocation(lampShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(lampModel));
+		glBindVertexArray(VAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(0);
+
+		
 
 
 		// Swap the screen buffers
@@ -405,7 +626,7 @@ void DoMovement()
 
 	}
 
-	if (keys[GLFW_KEY_T])
+	/*if (keys[GLFW_KEY_T])
 	{
 		pointLightPositions[0].x += 0.01f;
 	}
@@ -430,6 +651,32 @@ void DoMovement()
 	if (keys[GLFW_KEY_J])
 	{
 		pointLightPositions[0].z += 0.01f;
+	}*/
+
+	if (keys[GLFW_KEY_R] && !useSecondLight)
+	{
+		lightAngle += 2.0f * deltaTime; // Rotar en sentido horario
+	}
+
+	if (keys[GLFW_KEY_F] && !useSecondLight)
+	{
+		lightAngle -= 2.0f * deltaTime; // Rotar en sentido antihorario
+	}
+
+	if (keys[GLFW_KEY_T] && useSecondLight)
+	{
+		lightAngle2 += 2.0f * deltaTime; // Rotar en sentido horario
+	}
+
+	if (keys[GLFW_KEY_G] && useSecondLight)
+	{
+		lightAngle2 -= 2.0f * deltaTime; // Rotar en sentido antihorario
+	}
+
+
+	if (keys[GLFW_KEY_Z])
+	{
+		useSecondLight = !useSecondLight; // Alternar estado al presionar Z
 	}
 	
 }
