@@ -309,7 +309,7 @@ int main()
 		
 		float amplitude = 0.9f;  // (1.75 - (-0.15)) / 2
 		float offset = 0.75f;    // -0.15 + amplitude = -0.15 + 0.95
-		ballPosY = amplitude * sin(animTime - 1.5708f) + offset;
+		ballPosY = amplitude * -cos(animTime) + offset;
 
 		
 		
