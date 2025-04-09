@@ -1,3 +1,7 @@
+//Practica#10 (AnimBasica) Monroy Salazar
+//Fecha de entrega 08 de Abril de 2025
+//315118894
+
 #include <iostream>
 #include <cmath>
 
@@ -28,7 +32,7 @@
 void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode);
 void MouseCallback(GLFWwindow *window, double xPos, double yPos);
 void DoMovement();
-void Animation();
+//void Animation();
 
 // Window dimensions
 const GLuint WIDTH = 800, HEIGHT = 600;
@@ -99,9 +103,13 @@ float vertices[] = {
 
 
 glm::vec3 Light1 = glm::vec3(0);
+
+
 //Anim
 float rotBall = 0;
+float ballPosY = -0.15f;
 bool AnimBall = false;
+float animTime = 0.0f;
 
 
 // Deltatime
@@ -120,7 +128,7 @@ int main()
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);*/
 
 	// Create a GLFWwindow object that we can use for GLFW's functions
-	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Animacion basica", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Animacion basica Monroy Salazar", nullptr, nullptr);
 
 	if (nullptr == window)
 	{
@@ -198,7 +206,7 @@ int main()
 		// Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
 		glfwPollEvents();
 		DoMovement();
-		Animation();
+		//Animation();
 
 		// Clear the colorbuffer
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -234,6 +242,8 @@ int main()
 		lightColor.x= abs(sin(glfwGetTime() *Light1.x));
 		lightColor.y= abs(sin(glfwGetTime() *Light1.y));
 		lightColor.z= sin(glfwGetTime() *Light1.z);
+
+		
 
 		
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].position"), pointLightPositions[0].x, pointLightPositions[0].y, pointLightPositions[0].z);
@@ -290,12 +300,28 @@ int main()
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
 		Dog.Draw(lightingShader);
 
+
+		// Si la animación está activa, acumula el tiempo
+		if (AnimBall) {
+			animTime += deltaTime;
+		}
+
+		
+		float amplitude = 0.9f;  // (1.75 - (-0.15)) / 2
+		float offset = 0.75f;    // -0.15 + amplitude = -0.15 + 0.95
+		ballPosY = amplitude * sin(animTime - 1.5708f) + offset;
+
+		
+		
+		
+
 		model = glm::mat4(1);
 		glEnable(GL_BLEND);//Avtiva la funcionalidad para trabajar el canal alfa
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 1);
-		model = glm::rotate(model, glm::radians(rotBall), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, ballPosY, 0.1f));
+		//model = glm::rotate(model, glm::radians(rotBall), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 	    Ball.Draw(lightingShader); 
 		glDisable(GL_BLEND);  //Desactiva el canal alfa 
@@ -439,20 +465,23 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 	if (keys[GLFW_KEY_N])
 	{
 		AnimBall = !AnimBall;
+
 		
 	}
 }
-void Animation() {
-	if (AnimBall)
-	{
-		rotBall += 0.2f;
-		//printf("%f", rotBall);
-	}
-	else
-	{
-		//rotBall = 0.0f;
-	}
-}
+//void Animation() {
+//	if (AnimBall)
+//	{
+//		rotBall += 0.2f;
+//		//printf("%f", rotBall);
+//	}
+//	else
+//	{
+//		//rotBall = 0.0f;
+//	}
+//}
+
+
 
 void MouseCallback(GLFWwindow *window, double xPos, double yPos)
 {
