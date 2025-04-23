@@ -522,7 +522,13 @@ void Animation() {
 	}
 
 	if (dogAnim == 1) {//Wall Anim
+
+		if (dogPos.z > 2.3f) {
+			dogAnim = 0;
+		}
 		dogPos.z += 0.001f;
+
+		
 		if (!step)//State1
 		{
 			FLegs += 0.3f;
